@@ -1,5 +1,5 @@
 # Microbot32_WebControl
-#### A modular ui that can be hosted localy on an ESP32 based robot to interface with the robot through a browser using a usb HID controller. This is meant to be simmilar to the First FRC smart dashboard. 
+#### A modular UI that can be hosted localy on an ESP32 based robot to interface with the robot through a browser using a USB HID controller. This is meant to be simmilar to the First FRC smart dashboard. 
 
 ## How to use
 #### The ESP32 SPIFFS file system tool is needed to use this software. Heres how to [install](https://randomnerdtutorials.com/install-esp32-filesystem-uploader-arduino-ide/).
