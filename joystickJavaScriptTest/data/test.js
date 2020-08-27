@@ -42,7 +42,7 @@ function reportOnGamepadData() {
       dataOutput += ((gp.buttons[i].pressed)? ("1|") : ("0|"));
     }
     for(var i=0;i<gp.axes.length; i++) {  //Parse throught the joysticks to check their states
-      dataOutput += (((gp.axes[i]).toFixed(2))+"|");
+      dataOutput += ((((gp.axes[i]).toFixed(2))*100)+"|");
     }
     sendData(dataOutput); //Send the gamepad data back over websocket
   }

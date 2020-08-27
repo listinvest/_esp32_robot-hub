@@ -24,11 +24,17 @@
 #include "ESPmDNS.h"
 #include "ESPAsyncWebServer.h"
 
-const char* ssid = "THIS IS WHERE YOUR SSID GOES";  //This takes your wifi ssid
-const char* password = "THIS IS WHERE YOUR PASSWORD GOES";  //This takes your wifi password
+const char* ssid = "Scalise-Fi";  //This takes your wifi ssid
+const char* password = "curlyshrub060";  //This takes your wifi password
 
 AsyncWebServer server(80);  //Creates an asyncronomous webserver on port 80
 AsyncWebSocket ws("/"); //Creates an asyncronomous web socket at subdomain "/"
+
+struct GamePad_t {
+  int btns[16];
+  int joys[4];
+};
+GamePad_t GamePad;
 
 //Sets up mDNS
 void initializeDNS() {
@@ -47,7 +53,7 @@ void initializeFiles() {
 }
 
 //Function to interact with the incoming websocket data
-void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
+void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
   if(type == WS_EVT_CONNECT) {  //If the websocket is connected
     Serial.println("Websocket client connection started");
     Serial.println("---------------------------------------");
@@ -55,13 +61,37 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     Serial.println("Client disconnected");
     Serial.println("-----------------------");
   } else if(type == WS_EVT_DATA) {
-    for(int i=0; i < len; i++)  //Parse through incoming data to print character by character
-      Serial.print((char)data[i]);
+    char incomingData[len];
+    char *token;
+    for(int i=0; i < len; i++) {incomingData[i] = ((char) data[i]);}
+    token = strtok(incomingData, "|");
+    for(int i=0; i<16; i++) {
+      GamePad.btns[i] = atoi(token);
+      token = strtok(NULL, "|");
+    }
+    for(int i=0; i<4; i++) {
+      if(token != NULL) {
+        GamePad.joys[i] = atof(token);//val;
+        token = strtok(NULL, "|");
+      }
+    }
+
+//Print out data for debuging
+/*
+    for(int i=0; i<16; i++) {
+      Serial.print(GamePad.btns[i]);
+      Serial.print("|");
+    }
+    for(int i=0; i<4; i++) {
+      Serial.print(GamePad.joys[i]);
+      Serial.print("|");
+    }
     Serial.println();
+*/
   }
 }
 
-void setup(){
+void setup() {
   Serial.begin(115200);
   WiFi.begin(ssid, password); //Start WiFi
   delay(3000);
@@ -80,4 +110,4 @@ void setup(){
   Serial.println("Server Started");
 }
 
-void loop(){}
+void loop() {}
