@@ -1,7 +1,6 @@
 var hasGP = false;
 var repGP;
 var repSendDat;
-var repSendJoyDat;
 var ws = null;
 var connectedToWebSocket = false;
 
@@ -38,28 +37,14 @@ function canGame() {return "getGamepads" in navigator;}
 function reportOnGamepadData() {
   if(connectedToWebSocket) {  //Check if enabled
     var gp = navigator.getGamepads()[0];  //Get the gamepad data
+    var dataOutput = "";
     for(var i=0;i<gp.buttons.length;i++) {  //Parse through the buttons to check their states
-      if(gp.buttons[i].pressed) { //If a button is pressed send a human readable string packet describing the input
-        sendData(("Button "+(i+1)+": Pressed"));
-      }
+      dataOutput += ((gp.buttons[i].pressed)? ("1|") : ("0|"));
     }
-  }
-}
-
-//This function gets the data from the joysticks and returns it over the websocket
-function reportOnJoystickData() {
-  if(connectedToWebSocket) {  //Checks if enabled
-    var gp = navigator.getGamepads()[0];  //Get the gamepad joystick data
-    for(var i=0;i<gp.axes.length; i+=2) { //Parse through joysticks
-      var joyNum = (Math.ceil(i/2));  //Get the joystick number
-      var joyX = ((gp.axes[i]).toFixed(2)); //Round joystick vales to 2 significant figures
-      var joyY = ((gp.axes[i+1]).toFixed(2));
-      if(((joyX != lastJoys[joyNum][0]) || (joyY != lastJoys[joyNum][1]))) {  //Checks if the joystick value has changed since last reading
-        lastJoys[joyNum] = [joyX, joyY];  //Update the last joystick reading
-        //Send the joystick data in a human readable string packet over the websocket
-        sendData(("Joystick "+(joyNum+1)+"[ X: "+(joyX)+"  Y: "+(joyY)+" ]"));
-      }
+    for(var i=0;i<gp.axes.length; i++) {  //Parse throught the joysticks to check their states
+      dataOutput += (((gp.axes[i]).toFixed(2))+"|");
     }
+    sendData(dataOutput); //Send the gamepad data back over websocket
   }
 }
 
@@ -95,14 +80,12 @@ $(document).ready(function() {
             $("#gamepadPrompt").html("Controler connected!");
             repGP = window.setInterval(reportOnGamepad,100);
             repSendDat = window.setInterval(reportOnGamepadData,50);  //Set interval for websocket data return rate
-            repSendJoyDat = window.setInterval(reportOnJoystickData,50);  //Set interval for websocket data return rate
         });
         //This is the function run when the controller is disconnected
         $(window).on("gamepaddisconnected", function() {
             $("#gamepadPrompt").text(prompt);
             window.clearInterval(repGP);  //Stop trying to update gamepad data
             window.clearInterval(repSendDat); //Stop the websocket processes
-            window.clearInterval(repSendJoyDat);  //Stop the websocket processes
             closeWebsocket(); //Stop the websocket processes
         });
 

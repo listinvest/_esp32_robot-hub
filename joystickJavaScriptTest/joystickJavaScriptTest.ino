@@ -19,34 +19,31 @@
     *NOTE you need to change the websocket domain in "test.js" if you are not using mDNS.
 */
 
-
 #include "WiFi.h"
 #include "SPIFFS.h"
 #include "ESPmDNS.h"
 #include "ESPAsyncWebServer.h"
 
-const char* ssid = "YOUR SSID GOES HERE";  //This takes your wifi ssid
-const char* password =  "YOUR PASSWORD GOES HERE";  //This takes your wifi password
+const char* ssid = "THIS IS WHERE YOUR SSID GOES";  //This takes your wifi ssid
+const char* password = "THIS IS WHERE YOUR PASSWORD GOES";  //This takes your wifi password
 
 AsyncWebServer server(80);  //Creates an asyncronomous webserver on port 80
 AsyncWebSocket ws("/"); //Creates an asyncronomous web socket at subdomain "/"
 
 //Sets up mDNS
 void initializeDNS() {
-  if (!MDNS.begin("robot")) { //Creates dns name in this case it is robot.
+  if (!MDNS.begin("robot")) //Creates dns name in this case it is robot.
     Serial.println("Error setting up MDNS responder!");
-  } else {
+  else
     Serial.println("DNS server started");
-  }
 }
 
 //Starts SPIFFS file system for files to be used for hosting
 void initializeFiles() {
-  if (!SPIFFS.begin()) {
+  if (!SPIFFS.begin())
     Serial.println("SPIFFS Mount failed");
-  } else {
+  else
     Serial.println("SPIFFS Mount succesfull");
-  }
 }
 
 //Function to interact with the incoming websocket data
@@ -58,9 +55,8 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
     Serial.println("Client disconnected");
     Serial.println("-----------------------");
   } else if(type == WS_EVT_DATA) {
-    for(int i=0; i < len; i++) {  //Parse through incoming data to print character by character
-          Serial.print((char) data[i]);
-    }
+    for(int i=0; i < len; i++)  //Parse through incoming data to print character by character
+      Serial.print((char)data[i]);
     Serial.println();
   }
 }
@@ -69,26 +65,19 @@ void setup(){
   Serial.begin(115200);
   WiFi.begin(ssid, password); //Start WiFi
   delay(3000);
-
   initializeFiles();  //Starts file system
   Serial.print("Connecting to WiFi.");  while(WiFi.status() != WL_CONNECTED) {Serial.print("."); delay(500);} //Wait for connection to wifi
   Serial.println();
   Serial.println(WiFi.localIP()); //Print local IP address
   initializeDNS();  //Start mDNS server on local network
-
   ws.onEvent(onWsEvent);  //Create event for websockets
   server.addHandler(&ws); //Put websocket event in the schedule handler for the server
-
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){  //If a HTTP_GET request is recived for "/" subdomain serve the index.html page
-    request->send(SPIFFS, "/index.html", "text/html");
-  });
-  server.on("/test.js", HTTP_GET, [](AsyncWebServerRequest *request){ //If a HTTP_GET request is recived for "/test.js" serve javascript file
-    request->send(SPIFFS, "/test.js", "text/javascript");
-  });
-
+  //If a HTTP_GET request is recived for "/" subdomain serve the index.html page
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/index.html", "text/html");});
+  //If a HTTP_GET request is recived for "/test.js" serve javascript file
+  server.on("/test.js", HTTP_GET, [](AsyncWebServerRequest *request) {request->send(SPIFFS, "/test.js", "text/javascript");});
   server.begin(); //Start the server schedule handler
   Serial.println("Server Started");
 }
 
-void loop(){
-}
+void loop(){}
