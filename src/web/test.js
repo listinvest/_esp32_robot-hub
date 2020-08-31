@@ -12,18 +12,14 @@ function openWebsocket() {
   ws = new WebSocket("ws://robot.local/");
   //Funtion to be used when the enable button is pressed
   ws.onopen = function() {
-    document.getElementById("connectButton").disabled = true;
-    document.getElementById("connectButton").style.background = 'green';
-    document.getElementById("disconnectButton").disabled = false;
-    document.getElementById("disconnectButton").style.background = 'white';
+    $("#connectButton").text("Enabled").removeClass("btn-outline-success").addClass("btn-success").prop('disabled', true);
+    $("#disconnectButton").text("Disable").removeClass("btn-danger").addClass("btn-outline-danger").prop('disabled', false);
     connectedToWebSocket = true;
   };
   //Function to be used when the disable button is pressed
   ws.onclose = function() {
-    document.getElementById("connectButton").disabled = false;
-    document.getElementById("connectButton").style.background = 'white';
-    document.getElementById("disconnectButton").disabled = true;
-    document.getElementById("disconnectButton").style.background = 'red';
+    $("#connectButton").text("Enable").removeClass("btn-success").addClass("btn-outline-success").prop('disabled', false);
+    $("#disconnectButton").text("Disabled").removeClass("btn-outline-danger").addClass("btn-danger").prop('disabled', true);
     connectedToWebSocket = false;
   };
 }
@@ -73,11 +69,11 @@ function reportOnGamepad() {
 //Runs at begining
 $(document).ready(function() {
     if(canGame()) {
-        var prompt = "Connect a controler and press any button!"; //Display the prompt of the controler connection status
+        var prompt = "Connect a controller and press any button!"; //Display the prompt of the controler connection status
         $("#gamepadPrompt").text(prompt);
         $(window).on("gamepadconnected", function() {
             hasGP = true;
-            $("#gamepadPrompt").html("Controler connected!");
+            $("#gamepadPrompt").html("Controller connected!");
             repGP = window.setInterval(reportOnGamepad,100);
             repSendDat = window.setInterval(reportOnGamepadData,50);  //Set interval for websocket data return rate
         });
